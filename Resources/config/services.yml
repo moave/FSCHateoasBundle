@@ -32,7 +32,8 @@ services:
             - @fsc_hateoas.metadata.factory
             - @fsc_hateoas.factory.parameters
             - @fsc_hateoas.routing.relation_url_generator
-            - @fsc_hateoas.property_accessor
+        calls:
+            - [setRequest, [@request_stack]]
 
     fsc_hateoas.factory.parameters:
         class: %fsc_hateoas.factory.parameters.class%
@@ -137,6 +138,9 @@ services:
         arguments:
             - @fsc_hateoas.metadata.factory
             - @fsc_hateoas.factory.parameters
+            - @request_stack
+        calls:
+            - [setRequest, [@request_stack]]
 
     fsc_hateoas.property_accessor:
         class: %fsc_hateoas.property_accessor.class%

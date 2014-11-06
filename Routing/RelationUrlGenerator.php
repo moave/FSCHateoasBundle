@@ -4,6 +4,7 @@ namespace FSC\HateoasBundle\Routing;
 
 use FSC\HateoasBundle\Metadata\MetadataFactoryInterface;
 use FSC\HateoasBundle\Factory\ParametersFactoryInterface;
+use Symfony\Component\HttpFoundation\RequestStack;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 
 class RelationUrlGenerator
@@ -12,13 +13,20 @@ class RelationUrlGenerator
     protected $parametersFactory;
     protected $urlGenerators;
     protected $forceAbsolute;
+    protected $request;
 
     public function __construct(MetadataFactoryInterface $metadataFactory, ParametersFactoryInterface $parametersFactory, $forceAbsolute = true)
     {
+
         $this->metadataFactory = $metadataFactory;
         $this->parametersFactory = $parametersFactory;
         $this->urlGenerators = array();
         $this->forceAbsolute = $forceAbsolute;
+    }
+
+    public function setRequest(RequestStack $request_stack)
+    {
+        $this->request = $request_stack->getCurrentRequest();
     }
 
     public function generateUrl($object, $rel)
@@ -39,9 +47,16 @@ class RelationUrlGenerator
             $absolute = $options['absolute'];
         }
 
+        $parameter = array(
+            "_format" => $this->request->getRequestFormat(),
+            "version" => $this->request->get('version')
+        );
+
+        $parameter += $relationMetadata->getParams();
+
         return $urlGenerator->generate(
             $relationMetadata->getRoute(),
-            $this->parametersFactory->createParameters($object, $relationMetadata->getParams()),
+            $this->parametersFactory->createParameters($object, $parameter),
             $absolute
         );
     }
